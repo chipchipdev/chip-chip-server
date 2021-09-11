@@ -5,17 +5,46 @@ export const typeDefs = gql`
 type Room {
     # the room id
     id: String!
-    # the owner for current room
-    owner: Participant!
     # the other participants that joined current room
-    participants: [Participant!]
+    participants: [Participant!]!
 }
 
 type Participant {
     id: String!
+    connections: [ParticipantConnection]!
+}
+
+type ParticipantConnection {
+    id: String!
+    stage: ParticipantConnectionStage
+}
+
+enum ParticipantConnectionStage {
+    pending
+    starting
+    candidating
+    connected
+}
+
+type ParticipantOffer {
+    roomId: String!
+    sentId: String!
+    receivedId: String!
     offer: RTCSessionDescriptionInit
+}
+
+type ParticipantAnswer {
+    roomId: String!
+    sentId: String!
+    receivedId: String!
     answer: RTCSessionDescriptionInit
-    candidate: String
+}
+
+type ParticipantCandidate {
+    roomId: String!
+    sentId: String!
+    receivedId: String!
+    candidate: RTCIceCandidate
 }
 
 # inherit from the standard web API
@@ -70,9 +99,59 @@ enum RTCIceCandidateType{
     srflx
 }
 
+input RTCSessionDescriptionInitInput {
+    sdp: String
+    type:RTCSdpEnum
+}
+
+input ParticipantInput {
+    id: String!
+}
+
+input RTCIceCandidateInput {
+    candidate: String
+    component: RTCIceComponentEnum
+    foundation: String
+    port: Int
+    priority: Int
+    protocol: RTCIceProtocolEnum
+    relatedAddress: String
+    relatedPort: Int
+    sdpMLineIndex: Int
+    sdpMid: String
+    tcpType: RTCIceTcpCandidateEnum
+    type: RTCIceCandidateType
+    usernameFragment: String
+}
+
 type Mutation {
-    createRoom(id: String!): Room!
-    joinRoom(id: String!): Room!
+    createRoom(id: String!, participant: ParticipantInput!): Room!
+    joinRoom(id: String!, participant: ParticipantInput!): Room!
+    # RTC Connection Part
+    offerTo(
+        roomId: String!, 
+        sentId: String!, 
+        receivedId: String!, 
+        offer: RTCSessionDescriptionInitInput
+    ): Boolean
+    answerTo(
+        roomId: String!,
+        sentId: String!,
+        receivedId: String!,
+        answer: RTCSessionDescriptionInitInput
+    ): Boolean
+    candidateTo(
+        roomId: String!,
+        sentId: String!,
+        receivedId: String!,
+        candidate: RTCIceCandidateInput
+    ): Boolean
+    updateConnectionStage(
+        roomId: String!,
+        participant: ParticipantInput,
+        participantConnectionId: String!
+        stage: ParticipantConnectionStage
+    ): Boolean
 }
 
 type Query {
@@ -80,9 +159,10 @@ type Query {
 }
 
 type Subscription {
-    roomCreated: Room 
+    roomJoined(id: String!): Room
+    offerSent(id: String!): ParticipantOffer
+    answerSent(id: String!): ParticipantAnswer
+    candidateSent(id: String!): ParticipantCandidate
+    connectionStageUpdated(id: String!): Room
 }
-
-
-
 `;

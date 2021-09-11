@@ -16,26 +16,103 @@ export type Scalars = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  answerTo?: Maybe<Scalars['Boolean']>;
+  candidateTo?: Maybe<Scalars['Boolean']>;
   createRoom: Room;
   joinRoom: Room;
+  offerTo?: Maybe<Scalars['Boolean']>;
+  updateConnectionStage?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type MutationAnswerToArgs = {
+  answer?: Maybe<RtcSessionDescriptionInitInput>;
+  receivedId: Scalars['String'];
+  roomId: Scalars['String'];
+  sentId: Scalars['String'];
+};
+
+
+export type MutationCandidateToArgs = {
+  candidate?: Maybe<RtcIceCandidateInput>;
+  receivedId: Scalars['String'];
+  roomId: Scalars['String'];
+  sentId: Scalars['String'];
 };
 
 
 export type MutationCreateRoomArgs = {
   id: Scalars['String'];
+  participant: ParticipantInput;
 };
 
 
 export type MutationJoinRoomArgs = {
   id: Scalars['String'];
+  participant: ParticipantInput;
+};
+
+
+export type MutationOfferToArgs = {
+  offer?: Maybe<RtcSessionDescriptionInitInput>;
+  receivedId: Scalars['String'];
+  roomId: Scalars['String'];
+  sentId: Scalars['String'];
+};
+
+
+export type MutationUpdateConnectionStageArgs = {
+  participant?: Maybe<ParticipantInput>;
+  participantConnectionId: Scalars['String'];
+  roomId: Scalars['String'];
+  stage?: Maybe<ParticipantConnectionStage>;
 };
 
 export type Participant = {
   __typename?: 'Participant';
-  answer?: Maybe<RtcSessionDescriptionInit>;
-  candidate?: Maybe<Scalars['String']>;
+  connections: Array<Maybe<ParticipantConnection>>;
   id: Scalars['String'];
+};
+
+export type ParticipantAnswer = {
+  __typename?: 'ParticipantAnswer';
+  answer?: Maybe<RtcSessionDescriptionInit>;
+  receivedId: Scalars['String'];
+  roomId: Scalars['String'];
+  sentId: Scalars['String'];
+};
+
+export type ParticipantCandidate = {
+  __typename?: 'ParticipantCandidate';
+  candidate?: Maybe<RtcIceCandidate>;
+  receivedId: Scalars['String'];
+  roomId: Scalars['String'];
+  sentId: Scalars['String'];
+};
+
+export type ParticipantConnection = {
+  __typename?: 'ParticipantConnection';
+  id: Scalars['String'];
+  stage?: Maybe<ParticipantConnectionStage>;
+};
+
+export enum ParticipantConnectionStage {
+  Candidating = 'candidating',
+  Connected = 'connected',
+  Pending = 'pending',
+  Starting = 'starting'
+}
+
+export type ParticipantInput = {
+  id: Scalars['String'];
+};
+
+export type ParticipantOffer = {
+  __typename?: 'ParticipantOffer';
   offer?: Maybe<RtcSessionDescriptionInit>;
+  receivedId: Scalars['String'];
+  roomId: Scalars['String'];
+  sentId: Scalars['String'];
 };
 
 export type Query = {
@@ -50,6 +127,22 @@ export type QueryRoomArgs = {
 
 export type RtcIceCandidate = {
   __typename?: 'RTCIceCandidate';
+  candidate?: Maybe<Scalars['String']>;
+  component?: Maybe<RtcIceComponentEnum>;
+  foundation?: Maybe<Scalars['String']>;
+  port?: Maybe<Scalars['Int']>;
+  priority?: Maybe<Scalars['Int']>;
+  protocol?: Maybe<RtcIceProtocolEnum>;
+  relatedAddress?: Maybe<Scalars['String']>;
+  relatedPort?: Maybe<Scalars['Int']>;
+  sdpMLineIndex?: Maybe<Scalars['Int']>;
+  sdpMid?: Maybe<Scalars['String']>;
+  tcpType?: Maybe<RtcIceTcpCandidateEnum>;
+  type?: Maybe<RtcIceCandidateType>;
+  usernameFragment?: Maybe<Scalars['String']>;
+};
+
+export type RtcIceCandidateInput = {
   candidate?: Maybe<Scalars['String']>;
   component?: Maybe<RtcIceComponentEnum>;
   foundation?: Maybe<Scalars['String']>;
@@ -101,16 +194,49 @@ export type RtcSessionDescriptionInit = {
   type?: Maybe<RtcSdpEnum>;
 };
 
+export type RtcSessionDescriptionInitInput = {
+  sdp?: Maybe<Scalars['String']>;
+  type?: Maybe<RtcSdpEnum>;
+};
+
 export type Room = {
   __typename?: 'Room';
   id: Scalars['String'];
-  owner: Participant;
-  participants?: Maybe<Array<Participant>>;
+  participants: Array<Participant>;
 };
 
 export type Subscription = {
   __typename?: 'Subscription';
-  roomCreated?: Maybe<Room>;
+  answerSent?: Maybe<ParticipantAnswer>;
+  candidateSent?: Maybe<ParticipantCandidate>;
+  connectionStageUpdated?: Maybe<Room>;
+  offerSent?: Maybe<ParticipantOffer>;
+  roomJoined?: Maybe<Room>;
+};
+
+
+export type SubscriptionAnswerSentArgs = {
+  id: Scalars['String'];
+};
+
+
+export type SubscriptionCandidateSentArgs = {
+  id: Scalars['String'];
+};
+
+
+export type SubscriptionConnectionStageUpdatedArgs = {
+  id: Scalars['String'];
+};
+
+
+export type SubscriptionOfferSentArgs = {
+  id: Scalars['String'];
+};
+
+
+export type SubscriptionRoomJoinedArgs = {
+  id: Scalars['String'];
 };
 
 
@@ -186,14 +312,22 @@ export type ResolversTypes = {
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Mutation: ResolverTypeWrapper<{}>;
   Participant: ResolverTypeWrapper<Participant>;
+  ParticipantAnswer: ResolverTypeWrapper<ParticipantAnswer>;
+  ParticipantCandidate: ResolverTypeWrapper<ParticipantCandidate>;
+  ParticipantConnection: ResolverTypeWrapper<ParticipantConnection>;
+  ParticipantConnectionStage: ParticipantConnectionStage;
+  ParticipantInput: ParticipantInput;
+  ParticipantOffer: ResolverTypeWrapper<ParticipantOffer>;
   Query: ResolverTypeWrapper<{}>;
   RTCIceCandidate: ResolverTypeWrapper<RtcIceCandidate>;
+  RTCIceCandidateInput: RtcIceCandidateInput;
   RTCIceCandidateType: RtcIceCandidateType;
   RTCIceComponentEnum: RtcIceComponentEnum;
   RTCIceProtocolEnum: RtcIceProtocolEnum;
   RTCIceTcpCandidateEnum: RtcIceTcpCandidateEnum;
   RTCSdpEnum: RtcSdpEnum;
   RTCSessionDescriptionInit: ResolverTypeWrapper<RtcSessionDescriptionInit>;
+  RTCSessionDescriptionInitInput: RtcSessionDescriptionInitInput;
   Room: ResolverTypeWrapper<Room>;
   String: ResolverTypeWrapper<Scalars['String']>;
   Subscription: ResolverTypeWrapper<{}>;
@@ -205,24 +339,63 @@ export type ResolversParentTypes = {
   Int: Scalars['Int'];
   Mutation: {};
   Participant: Participant;
+  ParticipantAnswer: ParticipantAnswer;
+  ParticipantCandidate: ParticipantCandidate;
+  ParticipantConnection: ParticipantConnection;
+  ParticipantInput: ParticipantInput;
+  ParticipantOffer: ParticipantOffer;
   Query: {};
   RTCIceCandidate: RtcIceCandidate;
+  RTCIceCandidateInput: RtcIceCandidateInput;
   RTCSessionDescriptionInit: RtcSessionDescriptionInit;
+  RTCSessionDescriptionInitInput: RtcSessionDescriptionInitInput;
   Room: Room;
   String: Scalars['String'];
   Subscription: {};
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
-  createRoom?: Resolver<ResolversTypes['Room'], ParentType, ContextType, RequireFields<MutationCreateRoomArgs, 'id'>>;
-  joinRoom?: Resolver<ResolversTypes['Room'], ParentType, ContextType, RequireFields<MutationJoinRoomArgs, 'id'>>;
+  answerTo?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationAnswerToArgs, 'receivedId' | 'roomId' | 'sentId'>>;
+  candidateTo?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationCandidateToArgs, 'receivedId' | 'roomId' | 'sentId'>>;
+  createRoom?: Resolver<ResolversTypes['Room'], ParentType, ContextType, RequireFields<MutationCreateRoomArgs, 'id' | 'participant'>>;
+  joinRoom?: Resolver<ResolversTypes['Room'], ParentType, ContextType, RequireFields<MutationJoinRoomArgs, 'id' | 'participant'>>;
+  offerTo?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationOfferToArgs, 'receivedId' | 'roomId' | 'sentId'>>;
+  updateConnectionStage?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationUpdateConnectionStageArgs, 'participantConnectionId' | 'roomId'>>;
 };
 
 export type ParticipantResolvers<ContextType = any, ParentType extends ResolversParentTypes['Participant'] = ResolversParentTypes['Participant']> = {
-  answer?: Resolver<Maybe<ResolversTypes['RTCSessionDescriptionInit']>, ParentType, ContextType>;
-  candidate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  connections?: Resolver<Array<Maybe<ResolversTypes['ParticipantConnection']>>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ParticipantAnswerResolvers<ContextType = any, ParentType extends ResolversParentTypes['ParticipantAnswer'] = ResolversParentTypes['ParticipantAnswer']> = {
+  answer?: Resolver<Maybe<ResolversTypes['RTCSessionDescriptionInit']>, ParentType, ContextType>;
+  receivedId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  roomId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  sentId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ParticipantCandidateResolvers<ContextType = any, ParentType extends ResolversParentTypes['ParticipantCandidate'] = ResolversParentTypes['ParticipantCandidate']> = {
+  candidate?: Resolver<Maybe<ResolversTypes['RTCIceCandidate']>, ParentType, ContextType>;
+  receivedId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  roomId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  sentId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ParticipantConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ParticipantConnection'] = ResolversParentTypes['ParticipantConnection']> = {
+  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  stage?: Resolver<Maybe<ResolversTypes['ParticipantConnectionStage']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ParticipantOfferResolvers<ContextType = any, ParentType extends ResolversParentTypes['ParticipantOffer'] = ResolversParentTypes['ParticipantOffer']> = {
   offer?: Resolver<Maybe<ResolversTypes['RTCSessionDescriptionInit']>, ParentType, ContextType>;
+  receivedId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  roomId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  sentId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -255,18 +428,25 @@ export type RtcSessionDescriptionInitResolvers<ContextType = any, ParentType ext
 
 export type RoomResolvers<ContextType = any, ParentType extends ResolversParentTypes['Room'] = ResolversParentTypes['Room']> = {
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  owner?: Resolver<ResolversTypes['Participant'], ParentType, ContextType>;
-  participants?: Resolver<Maybe<Array<ResolversTypes['Participant']>>, ParentType, ContextType>;
+  participants?: Resolver<Array<ResolversTypes['Participant']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type SubscriptionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = {
-  roomCreated?: SubscriptionResolver<Maybe<ResolversTypes['Room']>, "roomCreated", ParentType, ContextType>;
+  answerSent?: SubscriptionResolver<Maybe<ResolversTypes['ParticipantAnswer']>, "answerSent", ParentType, ContextType, RequireFields<SubscriptionAnswerSentArgs, 'id'>>;
+  candidateSent?: SubscriptionResolver<Maybe<ResolversTypes['ParticipantCandidate']>, "candidateSent", ParentType, ContextType, RequireFields<SubscriptionCandidateSentArgs, 'id'>>;
+  connectionStageUpdated?: SubscriptionResolver<Maybe<ResolversTypes['Room']>, "connectionStageUpdated", ParentType, ContextType, RequireFields<SubscriptionConnectionStageUpdatedArgs, 'id'>>;
+  offerSent?: SubscriptionResolver<Maybe<ResolversTypes['ParticipantOffer']>, "offerSent", ParentType, ContextType, RequireFields<SubscriptionOfferSentArgs, 'id'>>;
+  roomJoined?: SubscriptionResolver<Maybe<ResolversTypes['Room']>, "roomJoined", ParentType, ContextType, RequireFields<SubscriptionRoomJoinedArgs, 'id'>>;
 };
 
 export type Resolvers<ContextType = any> = {
   Mutation?: MutationResolvers<ContextType>;
   Participant?: ParticipantResolvers<ContextType>;
+  ParticipantAnswer?: ParticipantAnswerResolvers<ContextType>;
+  ParticipantCandidate?: ParticipantCandidateResolvers<ContextType>;
+  ParticipantConnection?: ParticipantConnectionResolvers<ContextType>;
+  ParticipantOffer?: ParticipantOfferResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   RTCIceCandidate?: RtcIceCandidateResolvers<ContextType>;
   RTCSessionDescriptionInit?: RtcSessionDescriptionInitResolvers<ContextType>;
