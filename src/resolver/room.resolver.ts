@@ -3,7 +3,7 @@ import { ApolloError } from 'apollo-server-express';
 import { randomUUID } from 'crypto';
 import {
   MutationAnswerToArgs,
-  MutationCandidateToArgs,
+  MutationCandidateToArgs, MutationCreateRoomArgs,
   MutationJoinRoomArgs,
   MutationOfferToArgs, MutationUpdateConnectionStageArgs,
   Participant,
@@ -79,7 +79,7 @@ export const roomResolver: Resolvers = {
     },
   },
   Mutation: {
-    async createRoom() {
+    async createRoom(_, { name }: MutationCreateRoomArgs) {
       let id; let
         participantId;
       do {
@@ -95,6 +95,7 @@ export const roomResolver: Resolvers = {
 
       const owner = {
         id: participantId,
+        name,
         connections: [],
       };
 
@@ -107,7 +108,7 @@ export const roomResolver: Resolvers = {
 
       return { room, participant: owner };
     },
-    async joinRoom(_, { id }: MutationJoinRoomArgs) {
+    async joinRoom(_, { id, name }: MutationJoinRoomArgs) {
       const roomIndex = rooms.findIndex((r) => r.id === id);
 
       if (roomIndex === -1) {
@@ -130,6 +131,7 @@ export const roomResolver: Resolvers = {
       // create new participant
       const newParticipant: Participant = {
         id: participantId,
+        name,
         connections: [],
       };
 

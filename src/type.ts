@@ -41,8 +41,14 @@ export type MutationCandidateToArgs = {
 };
 
 
+export type MutationCreateRoomArgs = {
+  name: Scalars['String'];
+};
+
+
 export type MutationJoinRoomArgs = {
   id: Scalars['String'];
+  name: Scalars['String'];
 };
 
 
@@ -65,6 +71,7 @@ export type Participant = {
   __typename?: 'Participant';
   connections: Array<Maybe<ParticipantConnection>>;
   id: Scalars['String'];
+  name: Scalars['String'];
 };
 
 export type ParticipantAnswer = {
@@ -98,6 +105,7 @@ export enum ParticipantConnectionStage {
 
 export type ParticipantInput = {
   id: Scalars['String'];
+  name: Scalars['String'];
 };
 
 export type ParticipantOffer = {
@@ -200,8 +208,8 @@ export type Room = {
 
 export type RoomWithCurrentParticipant = {
   __typename?: 'RoomWithCurrentParticipant';
-  participant?: Maybe<Participant>;
-  room?: Maybe<Room>;
+  participant: Participant;
+  room: Room;
 };
 
 export type Subscription = {
@@ -358,8 +366,8 @@ export type ResolversParentTypes = {
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   answerTo?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationAnswerToArgs, 'receivedId' | 'roomId' | 'sentId'>>;
   candidateTo?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationCandidateToArgs, 'receivedId' | 'roomId' | 'sentId'>>;
-  createRoom?: Resolver<ResolversTypes['RoomWithCurrentParticipant'], ParentType, ContextType>;
-  joinRoom?: Resolver<ResolversTypes['RoomWithCurrentParticipant'], ParentType, ContextType, RequireFields<MutationJoinRoomArgs, 'id'>>;
+  createRoom?: Resolver<ResolversTypes['RoomWithCurrentParticipant'], ParentType, ContextType, RequireFields<MutationCreateRoomArgs, 'name'>>;
+  joinRoom?: Resolver<ResolversTypes['RoomWithCurrentParticipant'], ParentType, ContextType, RequireFields<MutationJoinRoomArgs, 'id' | 'name'>>;
   offerTo?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationOfferToArgs, 'receivedId' | 'roomId' | 'sentId'>>;
   updateConnectionStage?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationUpdateConnectionStageArgs, 'participantConnectionId' | 'roomId'>>;
 };
@@ -367,6 +375,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
 export type ParticipantResolvers<ContextType = any, ParentType extends ResolversParentTypes['Participant'] = ResolversParentTypes['Participant']> = {
   connections?: Resolver<Array<Maybe<ResolversTypes['ParticipantConnection']>>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -434,8 +443,8 @@ export type RoomResolvers<ContextType = any, ParentType extends ResolversParentT
 };
 
 export type RoomWithCurrentParticipantResolvers<ContextType = any, ParentType extends ResolversParentTypes['RoomWithCurrentParticipant'] = ResolversParentTypes['RoomWithCurrentParticipant']> = {
-  participant?: Resolver<Maybe<ResolversTypes['Participant']>, ParentType, ContextType>;
-  room?: Resolver<Maybe<ResolversTypes['Room']>, ParentType, ContextType>;
+  participant?: Resolver<ResolversTypes['Participant'], ParentType, ContextType>;
+  room?: Resolver<ResolversTypes['Room'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
