@@ -126,7 +126,7 @@ export const roomResolver: Resolvers = {
       // meantime add current participant to other participants' connection list
       room.participants.forEach((p, index) => {
         room.participants[index].connections.push({
-          id,
+          id: participant.id,
           stage: ParticipantConnectionStage.Starting,
         });
       });
