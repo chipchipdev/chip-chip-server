@@ -9,6 +9,11 @@ type Room {
     participants: [Participant!]!
 }
 
+type RoomWithCurrentParticipant {
+    room: Room
+    participant: Participant
+}
+
 type Participant {
     id: String!
     connections: [ParticipantConnection]!
@@ -125,8 +130,8 @@ input RTCIceCandidateInput {
 }
 
 type Mutation {
-    createRoom(id: String!, participant: ParticipantInput!): Room!
-    joinRoom(id: String!, participant: ParticipantInput!): Room!
+    createRoom: RoomWithCurrentParticipant!
+    joinRoom(id: String!): RoomWithCurrentParticipant!
     # RTC Connection Part
     offerTo(
         roomId: String!, 

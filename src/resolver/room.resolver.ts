@@ -1,9 +1,9 @@
 import { PubSub, withFilter } from 'graphql-subscriptions';
 import { ApolloError } from 'apollo-server-express';
+import { randomUUID } from 'crypto';
 import {
   MutationAnswerToArgs,
   MutationCandidateToArgs,
-  MutationCreateRoomArgs,
   MutationJoinRoomArgs,
   MutationOfferToArgs, MutationUpdateConnectionStageArgs,
   Participant,
@@ -79,24 +79,35 @@ export const roomResolver: Resolvers = {
     },
   },
   Mutation: {
-    async createRoom(_, { id, participant }: MutationCreateRoomArgs) {
-      if (rooms.findIndex((r) => r.id === id) > -1) {
-        throw new ApolloError('room is existed');
+    async createRoom() {
+      let id; let
+        participantId;
+      do {
+        id = randomUUID();
+        participantId = randomUUID();
       }
+      while (
+        rooms.findIndex(
+          // eslint-disable-next-line @typescript-eslint/no-loop-func
+          (r) => r.id === id,
+        ) !== -1
+      );
+
+      const owner = {
+        id: participantId,
+        connections: [],
+      };
 
       const room = {
         id,
-        participants: [{
-          ...participant,
-          connections: [],
-        }],
+        participants: [owner],
       } as Room;
 
       rooms.push(room);
 
-      return room;
+      return { room, participant: owner };
     },
-    async joinRoom(_, { id, participant }: MutationJoinRoomArgs) {
+    async joinRoom(_, { id }: MutationJoinRoomArgs) {
       const roomIndex = rooms.findIndex((r) => r.id === id);
 
       if (roomIndex === -1) {
@@ -105,15 +116,20 @@ export const roomResolver: Resolvers = {
 
       const room = rooms[roomIndex];
 
-      const participantIndex = room.participants?.findIndex((p) => p.id === participant.id);
+      let participantId;
 
-      if (participantIndex > -1) {
-        throw new ApolloError('participant is existed');
-      }
+      do {
+        participantId = randomUUID();
+      } while (
+        room.participants?.findIndex(
+          // eslint-disable-next-line @typescript-eslint/no-loop-func
+          (p) => p.id === participantId,
+        ) !== -1
+      );
 
       // create new participant
       const newParticipant: Participant = {
-        id: participant.id,
+        id: participantId,
         connections: [],
       };
 
@@ -126,7 +142,7 @@ export const roomResolver: Resolvers = {
       // meantime add current participant to other participants' connection list
       room.participants.forEach((p, index) => {
         room.participants[index].connections.push({
-          id: participant.id,
+          id: participantId,
           stage: ParticipantConnectionStage.Starting,
         });
       });
@@ -137,7 +153,10 @@ export const roomResolver: Resolvers = {
         roomJoined: rooms[roomIndex],
       });
 
-      return room;
+      return {
+        room,
+        participant: newParticipant,
+      };
     },
     async offerTo(_, {
       roomId, sentId, receivedId, offer,

@@ -18,8 +18,8 @@ export type Mutation = {
   __typename?: 'Mutation';
   answerTo?: Maybe<Scalars['Boolean']>;
   candidateTo?: Maybe<Scalars['Boolean']>;
-  createRoom: Room;
-  joinRoom: Room;
+  createRoom: RoomWithCurrentParticipant;
+  joinRoom: RoomWithCurrentParticipant;
   offerTo?: Maybe<Scalars['Boolean']>;
   updateConnectionStage?: Maybe<Scalars['Boolean']>;
 };
@@ -41,15 +41,8 @@ export type MutationCandidateToArgs = {
 };
 
 
-export type MutationCreateRoomArgs = {
-  id: Scalars['String'];
-  participant: ParticipantInput;
-};
-
-
 export type MutationJoinRoomArgs = {
   id: Scalars['String'];
-  participant: ParticipantInput;
 };
 
 
@@ -205,6 +198,12 @@ export type Room = {
   participants: Array<Participant>;
 };
 
+export type RoomWithCurrentParticipant = {
+  __typename?: 'RoomWithCurrentParticipant';
+  participant?: Maybe<Participant>;
+  room?: Maybe<Room>;
+};
+
 export type Subscription = {
   __typename?: 'Subscription';
   answerSent?: Maybe<ParticipantAnswer>;
@@ -329,6 +328,7 @@ export type ResolversTypes = {
   RTCSessionDescriptionInit: ResolverTypeWrapper<RtcSessionDescriptionInit>;
   RTCSessionDescriptionInitInput: RtcSessionDescriptionInitInput;
   Room: ResolverTypeWrapper<Room>;
+  RoomWithCurrentParticipant: ResolverTypeWrapper<RoomWithCurrentParticipant>;
   String: ResolverTypeWrapper<Scalars['String']>;
   Subscription: ResolverTypeWrapper<{}>;
 };
@@ -350,6 +350,7 @@ export type ResolversParentTypes = {
   RTCSessionDescriptionInit: RtcSessionDescriptionInit;
   RTCSessionDescriptionInitInput: RtcSessionDescriptionInitInput;
   Room: Room;
+  RoomWithCurrentParticipant: RoomWithCurrentParticipant;
   String: Scalars['String'];
   Subscription: {};
 };
@@ -357,8 +358,8 @@ export type ResolversParentTypes = {
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   answerTo?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationAnswerToArgs, 'receivedId' | 'roomId' | 'sentId'>>;
   candidateTo?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationCandidateToArgs, 'receivedId' | 'roomId' | 'sentId'>>;
-  createRoom?: Resolver<ResolversTypes['Room'], ParentType, ContextType, RequireFields<MutationCreateRoomArgs, 'id' | 'participant'>>;
-  joinRoom?: Resolver<ResolversTypes['Room'], ParentType, ContextType, RequireFields<MutationJoinRoomArgs, 'id' | 'participant'>>;
+  createRoom?: Resolver<ResolversTypes['RoomWithCurrentParticipant'], ParentType, ContextType>;
+  joinRoom?: Resolver<ResolversTypes['RoomWithCurrentParticipant'], ParentType, ContextType, RequireFields<MutationJoinRoomArgs, 'id'>>;
   offerTo?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationOfferToArgs, 'receivedId' | 'roomId' | 'sentId'>>;
   updateConnectionStage?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationUpdateConnectionStageArgs, 'participantConnectionId' | 'roomId'>>;
 };
@@ -432,6 +433,12 @@ export type RoomResolvers<ContextType = any, ParentType extends ResolversParentT
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type RoomWithCurrentParticipantResolvers<ContextType = any, ParentType extends ResolversParentTypes['RoomWithCurrentParticipant'] = ResolversParentTypes['RoomWithCurrentParticipant']> = {
+  participant?: Resolver<Maybe<ResolversTypes['Participant']>, ParentType, ContextType>;
+  room?: Resolver<Maybe<ResolversTypes['Room']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type SubscriptionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = {
   answerSent?: SubscriptionResolver<Maybe<ResolversTypes['ParticipantAnswer']>, "answerSent", ParentType, ContextType, RequireFields<SubscriptionAnswerSentArgs, 'id'>>;
   candidateSent?: SubscriptionResolver<Maybe<ResolversTypes['ParticipantCandidate']>, "candidateSent", ParentType, ContextType, RequireFields<SubscriptionCandidateSentArgs, 'id'>>;
@@ -451,6 +458,7 @@ export type Resolvers<ContextType = any> = {
   RTCIceCandidate?: RtcIceCandidateResolvers<ContextType>;
   RTCSessionDescriptionInit?: RtcSessionDescriptionInitResolvers<ContextType>;
   Room?: RoomResolvers<ContextType>;
+  RoomWithCurrentParticipant?: RoomWithCurrentParticipantResolvers<ContextType>;
   Subscription?: SubscriptionResolvers<ContextType>;
 };
 
