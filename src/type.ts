@@ -218,7 +218,7 @@ export type Subscription = {
   candidateSent?: Maybe<ParticipantCandidate>;
   connectionStageUpdated?: Maybe<Room>;
   offerSent?: Maybe<ParticipantOffer>;
-  roomJoined?: Maybe<Room>;
+  roomJoined?: Maybe<RoomWithCurrentParticipant>;
 };
 
 
@@ -453,7 +453,7 @@ export type SubscriptionResolvers<ContextType = any, ParentType extends Resolver
   candidateSent?: SubscriptionResolver<Maybe<ResolversTypes['ParticipantCandidate']>, "candidateSent", ParentType, ContextType, RequireFields<SubscriptionCandidateSentArgs, 'id'>>;
   connectionStageUpdated?: SubscriptionResolver<Maybe<ResolversTypes['Room']>, "connectionStageUpdated", ParentType, ContextType, RequireFields<SubscriptionConnectionStageUpdatedArgs, 'id'>>;
   offerSent?: SubscriptionResolver<Maybe<ResolversTypes['ParticipantOffer']>, "offerSent", ParentType, ContextType, RequireFields<SubscriptionOfferSentArgs, 'id'>>;
-  roomJoined?: SubscriptionResolver<Maybe<ResolversTypes['Room']>, "roomJoined", ParentType, ContextType, RequireFields<SubscriptionRoomJoinedArgs, 'id'>>;
+  roomJoined?: SubscriptionResolver<Maybe<ResolversTypes['RoomWithCurrentParticipant']>, "roomJoined", ParentType, ContextType, RequireFields<SubscriptionRoomJoinedArgs, 'id'>>;
 };
 
 export type Resolvers<ContextType = any> = {

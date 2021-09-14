@@ -166,7 +166,7 @@ type Query {
 }
 
 type Subscription {
-    roomJoined(id: String!): Room
+    roomJoined(id: String!): RoomWithCurrentParticipant
     offerSent(id: String!): ParticipantOffer
     answerSent(id: String!): ParticipantAnswer
     candidateSent(id: String!): ParticipantCandidate

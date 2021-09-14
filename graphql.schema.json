@@ -1641,7 +1641,7 @@
             ],
             "type": {
               "kind": "OBJECT",
-              "name": "Room",
+              "name": "RoomWithCurrentParticipant",
               "ofType": null
             },
             "isDeprecated": false,

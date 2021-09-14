@@ -12,7 +12,7 @@ import {
   ParticipantConnectionStage,
   ParticipantOffer,
   Resolvers,
-  Room,
+  Room, RoomWithCurrentParticipant,
   SubscriptionAnswerSentArgs,
   SubscriptionCandidateSentArgs,
   SubscriptionOfferSentArgs,
@@ -36,9 +36,9 @@ export const roomResolver: Resolvers = {
       subscribe: withFilter(
         () => pubsub.asyncIterator([RoomEventEnum.ROOM_JOINED]),
         (
-          payload: { roomJoined: Room },
+          payload: { roomJoined: RoomWithCurrentParticipant },
           variables: SubscriptionRoomJoinedArgs,
-        ) => payload.roomJoined.id === variables.id,
+        ) => payload.roomJoined.room.id === variables.id,
       ),
     },
     offerSent: {
@@ -152,7 +152,10 @@ export const roomResolver: Resolvers = {
       room.participants.push(newParticipant);
 
       await pubsub.publish(RoomEventEnum.ROOM_JOINED, {
-        roomJoined: rooms[roomIndex],
+        roomJoined: {
+          room: rooms[roomIndex],
+          participant: newParticipant,
+        },
       });
 
       return {
@@ -163,6 +166,7 @@ export const roomResolver: Resolvers = {
     async offerTo(_, {
       roomId, sentId, receivedId, offer,
     }: MutationOfferToArgs) {
+      console.log(offer);
       const roomIndex = rooms.findIndex((r) => r.id === roomId);
 
       if (roomIndex === -1) {
