@@ -97,10 +97,8 @@ export type ParticipantConnection = {
 };
 
 export enum ParticipantConnectionStage {
-  Candidating = 'candidating',
   Connected = 'connected',
-  Pending = 'pending',
-  Starting = 'starting'
+  Pending = 'pending'
 }
 
 export type ParticipantInput = {

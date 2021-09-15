@@ -27,8 +27,6 @@ type ParticipantConnection {
 
 enum ParticipantConnectionStage {
     pending
-    starting
-    candidating
     connected
 }
 
