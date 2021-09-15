@@ -63,9 +63,9 @@ export const roomResolver: Resolvers = {
       subscribe: withFilter(
         () => pubsub.asyncIterator([RoomEventEnum.CANDIDATE_SENT]),
         (
-          payload: { candidateSent: Room },
+          payload: { candidateSent: ParticipantCandidate },
           variables: SubscriptionCandidateSentArgs,
-        ) => payload.candidateSent.id === variables.id,
+        ) => payload.candidateSent.roomId === variables.id,
       ),
     },
     connectionStageUpdated: {
@@ -166,7 +166,6 @@ export const roomResolver: Resolvers = {
     async offerTo(_, {
       roomId, sentId, receivedId, offer,
     }: MutationOfferToArgs) {
-      console.log(offer);
       const roomIndex = rooms.findIndex((r) => r.id === roomId);
 
       if (roomIndex === -1) {
@@ -224,7 +223,7 @@ export const roomResolver: Resolvers = {
         roomId,
       };
 
-      await pubsub.publish(RoomEventEnum.ANSWER_SENT, {
+      await pubsub.publish(RoomEventEnum.CANDIDATE_SENT, {
         candidateSent: candidateTransfer,
       });
 
@@ -243,8 +242,8 @@ export const roomResolver: Resolvers = {
 
       const participantIndex = room.participants?.findIndex((p) => p.id === participant.id);
 
-      if (participantIndex > -1) {
-        throw new ApolloError('participant is existed');
+      if (participantIndex === -1) {
+        throw new ApolloError('participant is not existed');
       }
 
       const participantConnectionIndex = room
