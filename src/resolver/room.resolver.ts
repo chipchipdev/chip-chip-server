@@ -1,6 +1,13 @@
-import { PubSub, withFilter } from 'graphql-subscriptions';
+import { withFilter } from 'graphql-subscriptions';
 import { ApolloError } from 'apollo-server-express';
 import { randomUUID } from 'crypto';
+import { RedisPubSub } from 'graphql-redis-subscriptions';
+import {
+  delay,
+  interval,
+  map,
+  Subject, switchMap, timer,
+} from 'rxjs';
 import {
   MutationAnswerToArgs,
   MutationCandidateToArgs, MutationCreateRoomArgs,
@@ -27,8 +34,51 @@ enum RoomEventEnum {
   CONNECTION_STAGE_UPDATED = 'CONNECTION_STAGE_UPDATED',
 }
 
-const pubsub = new PubSub();
+const pubsub = new RedisPubSub({
+  connection: {
+    host: 'localhost',
+    port: 6379,
+    retry_strategy: (options) => Math.max(options.attempt * 100, 3000),
+  },
+});
 const rooms: Room[] = [];
+
+const roomModifySubject: Subject<MutationUpdateConnectionStageArgs> = new Subject();
+
+roomModifySubject.pipe(delay(100)).subscribe(async ({
+  roomId, participant, participantConnectionId, stage,
+}) => {
+  const roomIndex = rooms.findIndex((r) => r.id === roomId);
+
+  if (roomIndex === -1) {
+    throw new ApolloError('room is not existed');
+  }
+
+  const room = rooms[roomIndex];
+
+  const participantIndex = room.participants?.findIndex((p) => p.id === participant.id);
+
+  if (participantIndex === -1) {
+    throw new ApolloError('participant is not existed');
+  }
+
+  const participantConnectionIndex = room
+    .participants[participantIndex]
+    .connections.findIndex((c) => c.id === participantConnectionId);
+
+  if (participantConnectionIndex === -1) {
+    throw new ApolloError('room logic error');
+  }
+
+  room
+    .participants[participantIndex]
+    .connections[participantConnectionIndex]
+    .stage = stage;
+
+  await pubsub.publish(RoomEventEnum.CONNECTION_STAGE_UPDATED, {
+    connectionStageUpdated: room,
+  });
+});
 
 export const roomResolver: Resolvers = {
   Subscription: {
@@ -232,35 +282,8 @@ export const roomResolver: Resolvers = {
     async updateConnectionStage(_, {
       roomId, participant, participantConnectionId, stage,
     }: MutationUpdateConnectionStageArgs) {
-      const roomIndex = rooms.findIndex((r) => r.id === roomId);
-
-      if (roomIndex === -1) {
-        throw new ApolloError('room is not existed');
-      }
-
-      const room = rooms[roomIndex];
-
-      const participantIndex = room.participants?.findIndex((p) => p.id === participant.id);
-
-      if (participantIndex === -1) {
-        throw new ApolloError('participant is not existed');
-      }
-
-      const participantConnectionIndex = room
-        .participants[participantIndex]
-        .connections.findIndex((c) => c.id === participantConnectionId);
-
-      if (participantConnectionIndex === -1) {
-        throw new ApolloError('room logic error');
-      }
-
-      room
-        .participants[participantIndex]
-        .connections[participantConnectionIndex]
-        .stage = stage;
-
-      await pubsub.publish(RoomEventEnum.CONNECTION_STAGE_UPDATED, {
-        connectionStageUpdated: room,
+      roomModifySubject.next({
+        roomId, participant, participantConnectionId, stage,
       });
 
       return true;
